@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./index.css" />
+  <script src="Random.js"></script>
+  <script src="./index.js" defer></script>
+  <title>Generateur de Mot de Passe</title>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="app-title">Generateur de Mot de Passe</h1>
+
+    <div class="box password-generated">
+      <div id="generatedPassword">PTx14PT</div>
+      <button id="copyButton" class="copy-btn" title="Copy to Clipboard">
+        <i class="bx bx-copy"></i>
+      </button>
+      <div id='copiedAlert' class='copied-alert hidden'>Copié <i class='bx bxs-check-circle'></i></div>
+    </div>
+
+    <form class="box password-settings">
+      <div class="input-row">
+        <label for="charLength">Nombre de Caractères</label>
+        <span id="charLengthSpan" class="char-length-value">0</span>
+        <input type="range" name="charLengthInput" oninput="charLengthChange(this.value);" id="charLengthInput" value="8" max="50" />
+      </div>
+
+      <div class="input-row">
+        <input type="checkbox" checked name="includeUpper" id="includeUpper" />
+        <label for="includeUpper">Inclus Lettres Majuscules</label>
+      </div>
+
+      <div class="input-row">
+        <input type="checkbox" checked name="includeLower" id="includeLower" />
+        <label for="includeLower">Inclus Lettres Miniscules</label>
+      </div>
+
+      <div class="input-row">
+        <input type="checkbox" checked name="includeNumber" id="includeNumber" />
+        <label for="includeNumber">Inclus Nombres</label>
+      </div>
+
+      <div class="input-row">
+        <input type="checkbox" name="includeSymbol" id="includeSymbol" />
+        <label for="includeSymbol">Inclus Symbols</label>
+      </div>
+
+      <div class="input-row">
+        <input type="checkbox" name="excludeSimilars" id="excludeSimilars" />
+        <label for="excludeSimilars">Exclus Similaires (ex: i, L, 1, o, 0, O)</label>
+      </div>
+
+      <button type="button" id="generateBtn" class="generate-btn">
+        Generer <i class="bx bx-right-arrow-alt"></i>
+      </button>
+    </form>
+  </div>
+</body>
+
+</html>
+
+<script>
+// ///////////////////////////
+// Random.js
+// //////////////////////////
+
+const Random = {
+  /**
+   * Retourne un nombre aleatoire entre min et max
+   * @param {number} min nombre minimum (inclus)
+   * @param {number} max nombre maximum (inclus)
+   */
+  nombre: (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  },
+
+  /**
+   * Retourne une chaine de charactere de la longueur spécifiée tout en incluant des charactères spéciaux
+   * @param {number} length nombre de charactere
+   * @param {} param1 specifie quel types de charactère à inclure
+   */
+  string: (
+    length,
+    { lower = true, upper = false, symbol = false, number = false } = {
+      lower: true,
+      upper: false,
+      symbol: false,
+      number: false
+    }
+  ) => {
+    const _chars = "abcdfghijklmnopqrstuvwxyz";
+    const _upper = "ABCDFGHIJKLMNOPQRSTUVWXYZ";
+    const _symbols = "!#$%&@[]";
+    const _numbers = "0123456789";
+
+    let chars = (
+      (lower ? _chars : "") +
+      (upper ? _upper : "") +
+      (symbol ? _symbols : "") +
+      (number ? _numbers : "")
+    ).split("");
+    let str = "";
+
+    for (let i = 0; i < length; i++) {
+      str += Random.element(chars);
+    }
+
+    return str;
+  },
+
+  /**
+   * retourne un element aléatoire appartenant à la liste
+   * @param {ArrayLike<any>} list
+   * @returns {any|undefined} undefined si la liste n'est pas defini ou est vide
+   */
+  element: (list) => {
+    return list?.[Random.nombre(0, list.length - 1)];
+  }
+};
+
+// ///////////////////////////
+// index.js
+// //////////////////////////
+
+let charLengthSpan = document.getElementById("charLengthSpan");
+let charLengthInput = document.getElementById("charLengthInput");
+let generatedPassword = document.getElementById("generatedPassword");
+let generateBtn = document.getElementById("generateBtn");
+let copyBtn = document.getElementById("copyButton");
+let copiedAlert = document.getElementById("copiedAlert");
+
+let includeUpper = document.getElementById("includeUpper");
+let includeLower = document.getElementById("includeLower");
+let includeNumber = document.getElementById("includeNumber");
+let includeSymbol = document.getElementById("includeSymbol");
+let excludeSimilars = document.getElementById("excludeSimilars");
+
+let passwordLength = 0,
+  options = {
+    lower: includeLower.checked,
+    upper: includeUpper.checked,
+    number: includeNumber.checked,
+    symbol: includeSymbol.checked,
+    noSimilars: excludeSimilars.checked
+  };
+
+// Callback pour changement de taille de mdp
+function charLengthChange(value) {
+  charLengthSpan.innerHTML = parseInt(value);
+  passwordLength = value;
+}
+
+// Genere le mot de passe
+function generatePassword(length, params) {
+  let generated = Random.string(length, params);
+  generated = options.noSimilars
+    ? generated.replace(/i|I|1|l|o|O|0|S/, "")
+    : generated;
+  generatedPassword.innerHTML = generated;
+}
+
+// Souscrit aux changements pour les checkbox
+[includeLower, includeUpper, includeNumber, includeSymbol].forEach((input) => {
+  input.addEventListener("change", (evt) => {
+    const property = input.id.toLowerCase().replace("include", "");
+    options[property] = input.checked;
+  });
+});
+
+excludeSimilars.addEventListener("change", (evt) => {
+  options.noSimilars = excludeSimilars.checked;
+});
+
+generateBtn.addEventListener("click", (evt) => {
+  evt.preventDefault();
+  generatePassword(passwordLength, options);
+});
+
+copyBtn.addEventListener("click", (evt) => {
+  navigator.clipboard.writeText(generatedPassword.textContent);
+  copiedAlert.classList.remove("hidden");
+
+  let t = setTimeout(() => {
+    copiedAlert.classList.add("hidden");
+    clearTimeout(t);
+  }, 3000);
+});
+
+charLengthChange(charLengthInput.value);
+generatePassword(passwordLength, options);
+
+
+</script>
