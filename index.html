@@ -1,72 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="./index.css" />
-  <script src="Random.js"></script>
-  <script src="./index.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <title>Generateur de Mot de Passe</title>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    .copied-alert {
+      position: absolute;
+      top: -40px;
+      right: 10px;
+      background-color: #10b981;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    input[type="range"] {
+      height: 6px;
+      border-radius: 5px;
+      appearance: none;
+      background: #e5e7eb;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
-<body>
-  <div class="container">
-    <h1 class="app-title">Generateur de Mot de Passe</h1>
+<body class="bg-gray-50 min-h-screen">
+  <header class="bg-white shadow-sm py-4">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <a href="#" class="text-2xl font-bold text-blue-600">PassGenerator</a>
+      <button class="p-2 rounded-full text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
 
-    <div class="box password-generated">
-      <div id="generatedPassword">PTx14PT</div>
-      <button id="copyButton" class="copy-btn" title="Copy to Clipboard">
-        <i class="bx bx-copy"></i>
+  <main class="container mx-auto  py-20 text-center relative overflow-hidden">
+    <h1 class="text-center  text-5xl font-bold mb-8">
+      <span class="block text-gray-900">Générez et gérez des mots de passe</span>
+      
+      <span class="block text-blue-600">uniques en toute sécurité.</span>
+    </h1>
+<br>
+ 
+    <div class="max-w-4xl mx-auto mb-6 password-generated bg-white rounded-lg shadow-md p-4 relative">
+      <div id="generatedPassword" class="text-2xl font-mono text-center py-3 select-all">PTx14PT</div>
+      <button id="copyButton" class="copy-btn absolute top-1/2 right-4 transform -translate-y-1/2 p-2 bg-gray-100 hover:bg-gray-200 rounded-md" title="Copy to Clipboard">
+        <i class="bx bx-copy text-gray-700"></i>
       </button>
       <div id='copiedAlert' class='copied-alert hidden'>Copié <i class='bx bxs-check-circle'></i></div>
     </div>
 
-    <form class="box password-settings">
-      <div class="input-row">
-        <label for="charLength">Nombre de Caractères</label>
-        <span id="charLengthSpan" class="char-length-value">0</span>
-        <input type="range" name="charLengthInput" oninput="charLengthChange(this.value);" id="charLengthInput" value="8" max="50" />
+
+    <form class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 password-settings">
+      <div class="mb-6 input-row">
+        <div class="flex justify-between items-center mb-2">
+          <label for="charLengthInput" class="text-gray-700 font-medium">Nombre de Caractères</label>
+          <span id="charLengthSpan" class="char-length-value bg-blue-100 text-blue-800 px-2 py-1 rounded-md font-medium">8</span>
+        </div>
+        <input type="range" name="charLengthInput" oninput="charLengthChange(this.value);" id="charLengthInput" value="8" max="50" class="w-full" />
       </div>
 
-      <div class="input-row">
-        <input type="checkbox" checked name="includeUpper" id="includeUpper" />
-        <label for="includeUpper">Inclus Lettres Majuscules</label>
+      <div class="space-y-4 mb-6 ">
+        <div class="flex items-center input-row ">
+          <input type="checkbox" checked name="includeUpper" id="includeUpper" class="w-4 h-4 text-blue-600 rounded" />
+          <label for="includeUpper" class="ml-3 text-gray-700">Inclus Lettres Majuscules</label>
+        </div>
+
+        <div class="flex items-center input-row">
+          <input type="checkbox" checked name="includeLower" id="includeLower" class="w-4 h-4 text-blue-600 rounded" />
+          <label for="includeLower" class="ml-3 text-gray-700">Inclus Lettres Miniscules</label>
+        </div>
+
+        <div class="flex items-center input-row">
+          <input type="checkbox" checked name="includeNumber" id="includeNumber" class="w-4 h-4 text-blue-600 rounded" />
+          <label for="includeNumber" class="ml-3 text-gray-700">Inclus Nombres</label>
+        </div>
+
+        <div class="flex items-center input-row">
+          <input type="checkbox" name="includeSymbol" id="includeSymbol" class="w-4 h-4 text-blue-600 rounded" />
+          <label for="includeSymbol" class="ml-3 text-gray-700">Inclus Symbols</label>
+        </div>
+
+        <div class="flex items-center input-row">
+          <input type="checkbox" name="excludeSimilars" id="excludeSimilars" class="w-4 h-4 text-blue-600 rounded" />
+          <label for="excludeSimilars" class="ml-3 text-gray-700">Exclus Similaires (ex: i, L, 1, o, 0, O)</label>
+        </div>
       </div>
 
-      <div class="input-row">
-        <input type="checkbox" checked name="includeLower" id="includeLower" />
-        <label for="includeLower">Inclus Lettres Miniscules</label>
-      </div>
-
-      <div class="input-row">
-        <input type="checkbox" checked name="includeNumber" id="includeNumber" />
-        <label for="includeNumber">Inclus Nombres</label>
-      </div>
-
-      <div class="input-row">
-        <input type="checkbox" name="includeSymbol" id="includeSymbol" />
-        <label for="includeSymbol">Inclus Symbols</label>
-      </div>
-
-      <div class="input-row">
-        <input type="checkbox" name="excludeSimilars" id="excludeSimilars" />
-        <label for="excludeSimilars">Exclus Similaires (ex: i, L, 1, o, 0, O)</label>
-      </div>
-
-      <button type="button" id="generateBtn" class="generate-btn">
-        Generer <i class="bx bx-right-arrow-alt"></i>
+      <button type="button" id="generateBtn" class="generate-btn w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors flex items-center justify-center">
+        Generer <i class="bx bx-right-arrow-alt ml-2"></i>
       </button>
     </form>
-  </div>
+    
+
+    <div class="max-w-4xl mx-auto mt-8 bg-white rounded-lg shadow-md p-6 ">
+      <h3 class="font-semibold text-lg text-gray-800 mb-4">Conseils pour un mot de passe sécurisé</h3>
+      <ul class="space-y-2 text-gray-600 text-sm">
+        <li class="flex items-start">
+          <i class="bx bx-check-circle text-green-500 mt-1 mr-2"></i>
+          <span>Utilisez au moins 12 caractères pour une meilleure sécurité</span>
+        </li>
+        <li class="flex items-start">
+          <i class="bx bx-check-circle text-green-500 mt-1 mr-2"></i>
+          <span>Mélangez majuscules, minuscules, chiffres et symboles</span>
+        </li>
+       
+      </ul>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-300 py-6 mt-12">
+    <div class="container mx-auto px-4 text-center">
+      <p>&copy; By Mahamoud Coulibaly </p>
+    </div>
+  </footer>
 </body>
 
 </html>
-
 <script>
 // ///////////////////////////
 // Random.js
@@ -119,7 +195,7 @@ const Random = {
   /**
    * retourne un element aléatoire appartenant à la liste
    * @param {ArrayLike<any>} list
-   * @returns {any|undefined} undefined si la liste n'est pas defini ou est vide
+   * @returns {any|x} undefined si la liste n'est pas defini ou est vide
    */
   element: (list) => {
     return list?.[Random.nombre(0, list.length - 1)];
